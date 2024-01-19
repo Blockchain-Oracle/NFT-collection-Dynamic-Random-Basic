@@ -11,6 +11,7 @@ error RandomIPFSNFT__RangeOutOfBounds();
 error RandomIPFSNFT__NotEnoughEthSent();
 error RandomIPFSNFT__WithdrawlFailed();
 error RandomIPFSNFT__NotOwner();
+error RandomIPFSNFT__NotOpen();
 
 contract RandomIPFSNFT is ERC721URIStorage, VRFConsumerBaseV2 {
     //NFT VARIABLES
@@ -44,6 +45,13 @@ contract RandomIPFSNFT is ERC721URIStorage, VRFConsumerBaseV2 {
         ST_BERNARD
     }
 
+    enum State {
+        open,
+        calculating
+    }
+
+    State private s_nftState;
+
     constructor(
         address _vrfCoordinator,
         uint64 _subscriptionId,
@@ -62,12 +70,17 @@ contract RandomIPFSNFT is ERC721URIStorage, VRFConsumerBaseV2 {
         i_mintFee = _amount;
         i_owner = msg.sender;
         S_TOKEN_URI = _tokenuri;
+        s_nftState = State.open;
     }
 
     function requestNft() public payable returns (uint256 requestId) {
+        if (s_nftState == State.calculating) {
+            revert RandomIPFSNFT__NotOpen();
+        }
         if (msg.value < i_mintFee) {
             revert RandomIPFSNFT__NotEnoughEthSent();
         }
+        s_nftState = State.calculating;
         requestId = i_vrfCoordinator.requestRandomWords(
             i_keyHash,
             i_subscriptionId,
@@ -113,6 +126,7 @@ contract RandomIPFSNFT is ERC721URIStorage, VRFConsumerBaseV2 {
         uint256 newCounter = s_tokenCounter;
         _safeMint(dogOwner, newCounter);
         s_tokenCounter++;
+        s_nftState = State.open;
         _setTokenURI(newCounter, S_TOKEN_URI[uint256(dogBreed)]);
         emit NftMinted(dogBreed, dogOwner);
     }

@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 // error DynamicNft__uriQurery_for_not_existent_query();
-error DynamicNft__URI_QueryFor_NonExistentToken();
+// error DynamicNft__URI_QueryFor_NonExistentToken();
 
 contract DynamicNft is ERC721URIStorage {
     uint256 private s_counter;

@@ -19,9 +19,19 @@ contract BasicNFT is ERC721 {
     }
 
     function tokenURI(
-        uint256 /* tokenId*/
+        uint256 tokenId
     ) public view override returns (string memory) {
-        // require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+        /**
+         * @dev Reverts if the `tokenId` doesn't have a current owner (it hasn't been minted, or it has been burned).
+         * Returns the owner.
+         *
+         * Overrides to ownership logic should be done to {_ownerOf}.
+         */
+
+        address owner = _ownerOf(tokenId);
+        if (owner == address(0)) {
+            revert ERC721NonexistentToken(tokenId);
+        }
         return TOKEN_URI;
     }
 
